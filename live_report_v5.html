@@ -10,25 +10,29 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Helvetica
 .wrap { max-width: 480px; margin: 0 auto; padding: 1rem 0; }
 .card { background: #fff; border: 0.5px solid rgba(0,0,0,0.12); border-radius: 12px; padding: 1.25rem; margin-bottom: 1rem; }
 .stitle { font-size: 12px; font-weight: 500; color: #888; margin-bottom: 12px; letter-spacing: 0.05em; text-transform: uppercase; }
-.field-group { display: flex; flex-direction: column; gap: 4px; margin-bottom: 10px; }
-.field-group label { font-size: 13px; color: #888; }
-.field-group input { border: 0.5px solid rgba(0,0,0,0.2); border-radius: 8px; padding: 9px 10px; font-size: 15px; background: #f5f5f0; color: #1a1a1a; width: 100%; }
-.field-group input:focus { outline: none; border-color: rgba(0,0,0,0.4); background: #fff; }
-.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-.calc-row { background: #f5f5f0; border-radius: 8px; padding: 10px 14px; display: flex; justify-content: space-between; align-items: center; margin-top: 2px; }
-.calc-label { font-size: 13px; color: #888; }
-.calc-value { font-size: 17px; font-weight: 500; color: #1a1a1a; }
-.preview-box { background: #f5f5f0; border-radius: 8px; padding: 16px; font-size: 16px; line-height: 2.2; color: #1a1a1a; white-space: pre-wrap; min-height: 60px; border: 0.5px solid rgba(0,0,0,0.12); }
+.fg { display: flex; flex-direction: column; gap: 4px; margin-bottom: 10px; }
+.fg label { font-size: 13px; color: #888; }
+.fg input { border: 0.5px solid rgba(0,0,0,0.2); border-radius: 8px; padding: 9px 10px; font-size: 15px; background: #f5f5f0; color: #1a1a1a; width: 100%; }
+.fg input:focus { outline: none; border-color: rgba(0,0,0,0.4); background: #fff; }
+.two { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.crow { background: #f5f5f0; border-radius: 8px; padding: 10px 14px; display: flex; justify-content: space-between; align-items: center; margin-top: 4px; }
+.crow span:first-child { font-size: 13px; color: #888; }
+.crow span:last-child { font-size: 17px; font-weight: 500; color: #1a1a1a; }
+.pbox { background: #f5f5f0; border-radius: 8px; padding: 16px; font-size: 16px; line-height: 2.2; color: #1a1a1a; white-space: pre-wrap; min-height: 60px; border: 0.5px solid rgba(0,0,0,0.12); }
 .btn { width: 100%; padding: 12px; border-radius: 8px; font-size: 15px; font-weight: 500; cursor: pointer; border: none; margin-top: 10px; }
-.btn-copy { background: #1D9E75; color: #fff; }
-.btn-next { background: #f5f5f0; color: #1a1a1a; border: 0.5px solid rgba(0,0,0,0.15); margin-top: 8px; }
-.btn-reset { background: #f5f5f0; color: #888; border: 0.5px solid rgba(0,0,0,0.15); margin-top: 8px; font-size: 13px; }
+.bg { background: #1D9E75; color: #fff; }
+.bs { background: #f5f5f0; color: #1a1a1a; border: 0.5px solid rgba(0,0,0,0.15); margin-top: 8px; }
+.bm { background: #f5f5f0; color: #888; border: 0.5px solid rgba(0,0,0,0.15); margin-top: 8px; font-size: 13px; }
 .copied { background: #0F6E56 !important; }
-.time-row { display: flex; gap: 8px; align-items: center; }
-.time-row select { flex: 1; border: 0.5px solid rgba(0,0,0,0.2); border-radius: 8px; padding: 9px 10px; font-size: 15px; background: #f5f5f0; color: #1a1a1a; }
+.trow { display: flex; gap: 8px; align-items: center; }
+.trow select { flex: 1; border: 0.5px solid rgba(0,0,0,0.2); border-radius: 8px; padding: 9px 10px; font-size: 15px; background: #f5f5f0; color: #1a1a1a; }
 .hint { font-size: 12px; color: #888; margin-top: 6px; }
-.prev-summary { font-size: 13px; color: #888; background: #f5f5f0; border-radius: 8px; padding: 8px 12px; margin-bottom: 10px; display: none; }
-.divider { border: none; border-top: 0.5px solid rgba(0,0,0,0.08); margin: 4px 0 14px; }
+.psm { font-size: 13px; color: #888; background: #f5f5f0; border-radius: 8px; padding: 8px 12px; margin-bottom: 10px; display: none; }
+.hrow { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 0.5px solid rgba(0,0,0,0.07); }
+.hrow:last-child { border-bottom: none; }
+.hempty { font-size: 14px; color: #bbb; text-align: center; padding: 12px 0; }
+.hdr { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+.clrbtn { font-size: 12px; color: #888; cursor: pointer; background: none; border: none; padding: 0; }
 </style>
 </head>
 <body>
@@ -36,201 +40,124 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Helvetica
 
   <div class="card">
     <div class="stitle">当前报数时间</div>
-    <div class="time-row">
+    <div class="trow">
       <select id="hour"></select>
       <span style="color:#888">:</span>
-      <select id="minute">
-        <option value="00">00</option>
-        <option value="30">30</option>
-      </select>
+      <select id="minute"><option value="00">00</option><option value="30">30</option></select>
     </div>
     <div class="hint" id="hint"></div>
   </div>
 
   <div class="card">
     <div class="stitle">本次数据（从平台抄）</div>
-    <div class="two-col">
-      <div class="field-group">
-        <label>累计 GMV（元）</label>
-        <input type="number" id="gmv" placeholder="82920" oninput="update()">
-      </div>
-      <div class="field-group">
-        <label>累计消耗（元）</label>
-        <input type="number" id="cost" placeholder="1530" oninput="update()">
-      </div>
+    <div class="two">
+      <div class="fg"><label>累计 GMV（元）</label><input type="number" id="gmv" placeholder="82920" oninput="update()"></div>
+      <div class="fg"><label>累计消耗（元）</label><input type="number" id="cost" placeholder="1530" oninput="update()"></div>
     </div>
-    <div class="field-group">
-      <label>ROI（可手动填，否则自动算）</label>
-      <input type="number" id="roi_manual" placeholder="自动计算" oninput="update()">
-    </div>
-    <div class="calc-row" style="margin-top:6px">
-      <span class="calc-label">全域 ROI</span>
-      <span class="calc-value" id="roi_val">—</span>
-    </div>
+    <div class="fg"><label>ROI（可手动填，否则自动算）</label><input type="number" id="roi_manual" placeholder="自动计算" oninput="update()"></div>
+    <div class="crow"><span>全域 ROI</span><span id="roi_val">—</span></div>
   </div>
 
   <div class="card">
     <div class="stitle">预览报告</div>
-    <div class="prev-summary" id="prev-summary"></div>
-    <div class="preview-box" id="preview">填写数据后自动生成...</div>
-    <button class="btn btn-copy" id="copyBtn" onclick="copyText()">一键复制，发微信群</button>
-    <button class="btn btn-next" onclick="nextPeriod()">已发送 → 准备下一时段 ↗</button>
-    <button class="btn btn-reset" onclick="resetAll()">重新开播（清空所有）</button>
+    <div class="psm" id="prev-summary"></div>
+    <div class="pbox" id="preview">填写数据后自动生成...</div>
+    <button class="btn bg" id="copyBtn" onclick="copyText()">一键复制，发微信群</button>
+    <button class="btn bs" onclick="nextPeriod()">已发送 → 准备下一时段 ↗</button>
+    <button class="btn bm" onclick="resetAll()">重新开播（清空所有）</button>
+  </div>
+
+  <div class="card">
+    <div class="hdr">
+      <div class="stitle" style="margin-bottom:0">时段 GMV 历史</div>
+      <button class="clrbtn" onclick="clearHistory()">清空</button>
+    </div>
+    <div id="hlist"><div class="hempty">发送后自动记录</div></div>
   </div>
 
   <div class="card">
     <div class="stitle">官号 / 达人 GMV 对比</div>
-    <div class="two-col">
-      <div class="field-group">
-        <label>官号 GMV（如 5.5）</label>
-        <input type="text" id="gmv_official" placeholder="5.5" oninput="updateCompare()">
-      </div>
-      <div class="field-group">
-        <label>达人 GMV（如 2.3）</label>
-        <input type="text" id="gmv_kol" placeholder="2.3" oninput="updateCompare()">
-      </div>
+    <div class="two">
+      <div class="fg"><label>官号 GMV（如 5.5）</label><input type="text" id="gmv_official" placeholder="5.5" oninput="updateCompare()"></div>
+      <div class="fg"><label>达人 GMV（如 2.3）</label><input type="text" id="gmv_kol" placeholder="2.3" oninput="updateCompare()"></div>
     </div>
-    <div class="preview-box" id="compare_text">填写数据后自动生成...</div>
-    <button class="btn btn-copy" id="compareCopyBtn" onclick="copyCompare()">一键复制，发微信群</button>
-    <button class="btn btn-reset" onclick="resetCompare()">清空</button>
+    <div class="pbox" id="compare_text">填写数据后自动生成...</div>
+    <button class="btn bg" id="compareCopyBtn" onclick="copyCompare()">一键复制，发微信群</button>
+    <button class="btn bm" onclick="resetCompare()">清空</button>
   </div>
 
 </div>
 <script>
-function pad(n) { return String(n).padStart(2,'0'); }
-function fmt(n) { return String(Math.round(n)); }
-
-var prevGMV = null;
-var prevTime = null;
-
-function buildHours() {
-  var sel = document.getElementById('hour');
-  for (var i = 0; i <= 23; i++) {
-    var o = document.createElement('option');
-    o.value = pad(i); o.textContent = pad(i);
-    sel.appendChild(o);
-  }
-}
-
-function getSelectedTime() {
-  return document.getElementById('hour').value + ':' + document.getElementById('minute').value;
-}
-
-function getCTime() {
-  return getSelectedTime();
-}
-
-function getNow() {
-  var now = new Date();
-  var h = pad(now.getHours());
-  var m = now.getMinutes() >= 30 ? '30' : '00';
-  document.getElementById('hour').value = h;
-  document.getElementById('minute').value = m;
-  updateHint();
-}
-
-function updateHint() {
-  var summary = document.getElementById('prev-summary');
-  if (prevTime !== null && prevGMV !== null) {
-    document.getElementById('hint').textContent = '上一时段：' + prevTime + '  累计GMV：' + fmt(prevGMV);
-    summary.style.display = 'block';
-    summary.textContent = '上次存档：' + prevTime + '  累计GMV ' + fmt(prevGMV);
-  } else {
-    document.getElementById('hint').textContent = '首次报数，无需上一时段数据';
-    summary.style.display = 'none';
-  }
+var prevGMV=null,prevTime=null,hist=[];
+function pad(n){return String(n).padStart(2,'0');}
+function fmt(n){return String(Math.round(n));}
+function getT(){return document.getElementById('hour').value+':'+document.getElementById('minute').value;}
+function buildHours(){var s=document.getElementById('hour');for(var i=0;i<=23;i++){var o=document.createElement('option');o.value=pad(i);o.textContent=pad(i);s.appendChild(o);}}
+function getNow(){var n=new Date();document.getElementById('hour').value=pad(n.getHours());document.getElementById('minute').value=n.getMinutes()>=30?'30':'00';updateHint();}
+function updateHint(){
+  var sm=document.getElementById('prev-summary');
+  if(prevTime!==null&&prevGMV!==null){document.getElementById('hint').textContent='上一时段：'+prevTime+'  累计GMV：'+fmt(prevGMV);sm.style.display='block';sm.textContent='上次存档：'+prevTime+'  累计GMV '+fmt(prevGMV);}
+  else{document.getElementById('hint').textContent='首次报数，无需上一时段数据';sm.style.display='none';}
   update();
 }
-
-function update() {
-  var curTime = getSelectedTime();
-  var gmv = parseFloat(document.getElementById('gmv').value);
-  var cost = parseFloat(document.getElementById('cost').value);
-  var roiM = document.getElementById('roi_manual').value;
-
-  var roiVal = '—';
-  if (!isNaN(gmv) && !isNaN(cost) && cost > 0) roiVal = (gmv / cost).toFixed(2);
-  if (roiM !== '') roiVal = parseFloat(roiM).toFixed(2);
-  document.getElementById('roi_val').textContent = roiVal;
-
-  var lines = [];
-  if (!isNaN(gmv) || !isNaN(cost) || roiVal !== '—') {
-    lines.push(curTime);
-    if (!isNaN(gmv)) lines.push('GMV：' + fmt(gmv));
-    if (!isNaN(cost)) lines.push('消耗：' + cost.toFixed(2));
-    if (roiVal !== '—') lines.push('ROI：' + roiVal);
-    if (!isNaN(gmv) && prevGMV !== null && prevTime !== null) {
-      lines.push(prevTime + '-' + curTime + ' GMV：' + fmt(gmv - prevGMV));
-    }
+function update(){
+  var t=getT(),gmv=parseFloat(document.getElementById('gmv').value),cost=parseFloat(document.getElementById('cost').value),roiM=document.getElementById('roi_manual').value;
+  var roi='—';
+  if(!isNaN(gmv)&&!isNaN(cost)&&cost>0)roi=(gmv/cost).toFixed(2);
+  if(roiM!=='')roi=parseFloat(roiM).toFixed(2);
+  document.getElementById('roi_val').textContent=roi;
+  var lines=[];
+  if(!isNaN(gmv)||!isNaN(cost)||roi!=='—'){
+    lines.push(t);
+    if(!isNaN(gmv))lines.push('GMV：'+fmt(gmv));
+    if(!isNaN(cost))lines.push('消耗：'+cost.toFixed(2));
+    if(roi!=='—')lines.push('ROI：'+roi);
+    if(!isNaN(gmv)&&prevGMV!==null&&prevTime!==null)lines.push(prevTime+'-'+t+' GMV：'+fmt(gmv-prevGMV));
   }
-  document.getElementById('preview').textContent = lines.length ? lines.join('\n') : '填写数据后自动生成...';
+  document.getElementById('preview').textContent=lines.length?lines.join('\n'):'填写数据后自动生成...';
 }
-
-function copyText() {
-  var text = document.getElementById('preview').textContent;
-  if (text === '填写数据后自动生成...') return;
-  doFlash('copyBtn', '一键复制，发微信群', text);
+function renderHist(){
+  var el=document.getElementById('hlist');
+  if(hist.length===0){el.innerHTML='<div class="hempty">发送后自动记录</div>';return;}
+  el.innerHTML=hist.map(function(r){return '<div class="hrow"><span style="font-size:14px;color:#888">'+r.p+'</span><span style="font-size:15px;font-weight:500;color:#1a1a1a">GMV '+fmt(r.g)+'</span></div>';}).join('');
 }
-
-function nextPeriod() {
-  var gmv = parseFloat(document.getElementById('gmv').value);
-  var curTime = getSelectedTime();
-  if (!isNaN(gmv)) { prevGMV = gmv; prevTime = curTime; }
-  ['gmv','cost','roi_manual'].forEach(function(id) { document.getElementById(id).value = ''; });
-  document.getElementById('roi_val').textContent = '—';
-  document.getElementById('preview').textContent = '填写数据后自动生成...';
+function nextPeriod(){
+  var gmv=parseFloat(document.getElementById('gmv').value),t=getT();
+  if(!isNaN(gmv)&&prevGMV!==null&&prevTime!==null){hist.push({p:prevTime+'-'+t,g:gmv-prevGMV});renderHist();}
+  if(!isNaN(gmv)){prevGMV=gmv;prevTime=t;}
+  ['gmv','cost','roi_manual'].forEach(function(id){document.getElementById(id).value='';});
+  document.getElementById('roi_val').textContent='—';
+  document.getElementById('preview').textContent='填写数据后自动生成...';
   updateHint();
 }
-
-function resetAll() {
-  prevGMV = null; prevTime = null;
-  ['gmv','cost','roi_manual'].forEach(function(id) { document.getElementById(id).value = ''; });
-  document.getElementById('roi_val').textContent = '—';
-  document.getElementById('preview').textContent = '填写数据后自动生成...';
-  document.getElementById('prev-summary').style.display = 'none';
-  document.getElementById('hint').textContent = '首次报数，无需上一时段数据';
+function clearHistory(){hist=[];renderHist();}
+function resetAll(){
+  prevGMV=null;prevTime=null;hist=[];
+  ['gmv','cost','roi_manual'].forEach(function(id){document.getElementById(id).value='';});
+  document.getElementById('roi_val').textContent='—';
+  document.getElementById('preview').textContent='填写数据后自动生成...';
+  document.getElementById('prev-summary').style.display='none';
+  document.getElementById('hint').textContent='首次报数，无需上一时段数据';
+  renderHist();
 }
-
-function updateCompare() {
-  var off = document.getElementById('gmv_official').value.trim();
-  var kol = document.getElementById('gmv_kol').value.trim();
-  var t = getCTime();
-  if (off === '' && kol === '') {
-    document.getElementById('compare_text').textContent = '填写数据后自动生成...';
-    return;
-  }
-  var offStr = off !== '' ? off + 'w' : '—';
-  var kolStr = kol !== '' ? kol + 'w' : '—';
-  document.getElementById('compare_text').textContent = '官号/达人 ' + t + ' ' + offStr + '/' + kolStr;
+function updateCompare(){
+  var off=document.getElementById('gmv_official').value.trim(),kol=document.getElementById('gmv_kol').value.trim(),t=getT();
+  if(off===''&&kol===''){document.getElementById('compare_text').textContent='填写数据后自动生成...';return;}
+  document.getElementById('compare_text').textContent='官号/达人 '+t+' '+(off!==''?off+'w':'—')+'/'+(kol!==''?kol+'w':'—');
 }
-
-function copyCompare() {
-  var text = document.getElementById('compare_text').textContent;
-  if (text === '填写数据后自动生成...') return;
-  doFlash('compareCopyBtn', '一键复制，发微信群', text);
+function copyText(){doFlash('copyBtn','一键复制，发微信群',document.getElementById('preview').textContent);}
+function copyCompare(){doFlash('compareCopyBtn','一键复制，发微信群',document.getElementById('compare_text').textContent);}
+function resetCompare(){['gmv_official','gmv_kol'].forEach(function(id){document.getElementById(id).value='';});document.getElementById('compare_text').textContent='填写数据后自动生成...';}
+function doFlash(id,orig,text){
+  if(text==='填写数据后自动生成...')return;
+  var btn=document.getElementById(id);
+  var done=function(){btn.textContent='已复制！去粘贴到微信群';btn.classList.add('copied');setTimeout(function(){btn.textContent=orig;btn.classList.remove('copied');},2000);};
+  if(navigator.clipboard)navigator.clipboard.writeText(text).then(done);
+  else{var ta=document.createElement('textarea');ta.value=text;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);done();}
 }
-
-function resetCompare() {
-  ['gmv_official','gmv_kol'].forEach(function(id) { document.getElementById(id).value = ''; });
-  document.getElementById('compare_text').textContent = '填写数据后自动生成...';
-}
-
-function doFlash(btnId, originalText, textToCopy) {
-  var btn = document.getElementById(btnId);
-  var flash = function() {
-    btn.textContent = '已复制！去粘贴到微信群';
-    btn.classList.add('copied');
-    setTimeout(function() { btn.textContent = originalText; btn.classList.remove('copied'); }, 2000);
-  };
-  if (navigator.clipboard) navigator.clipboard.writeText(textToCopy).then(flash);
-  else { var ta = document.createElement('textarea'); ta.value = textToCopy; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta); flash(); }
-}
-
-document.getElementById('hour').addEventListener('change', updateHint);
-document.getElementById('minute').addEventListener('change', updateHint);
-
-buildHours();
-getNow();
+document.getElementById('hour').addEventListener('change',updateHint);
+document.getElementById('minute').addEventListener('change',updateHint);
+buildHours();getNow();
 </script>
 </body>
 </html>
