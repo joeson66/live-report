@@ -80,18 +80,6 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Helvetica
 
   <div class="card">
     <div class="stitle">官号 / 达人 GMV 对比</div>
-    <div class="field-group">
-      <label>时间</label>
-      <div class="time-row">
-        <select id="c_hour"></select>
-        <span style="color:#888">:</span>
-        <select id="c_minute">
-          <option value="00">00</option>
-          <option value="30">30</option>
-        </select>
-      </div>
-    </div>
-    <hr class="divider">
     <div class="two-col">
       <div class="field-group">
         <label>官号 GMV（如 5.5）</label>
@@ -116,14 +104,12 @@ var prevGMV = null;
 var prevTime = null;
 
 function buildHours() {
-  ['hour','c_hour'].forEach(function(id) {
-    var sel = document.getElementById(id);
-    for (var i = 0; i <= 23; i++) {
-      var o = document.createElement('option');
-      o.value = pad(i); o.textContent = pad(i);
-      sel.appendChild(o);
-    }
-  });
+  var sel = document.getElementById('hour');
+  for (var i = 0; i <= 23; i++) {
+    var o = document.createElement('option');
+    o.value = pad(i); o.textContent = pad(i);
+    sel.appendChild(o);
+  }
 }
 
 function getSelectedTime() {
@@ -131,7 +117,7 @@ function getSelectedTime() {
 }
 
 function getCTime() {
-  return document.getElementById('c_hour').value + ':' + document.getElementById('c_minute').value;
+  return getSelectedTime();
 }
 
 function getNow() {
@@ -140,8 +126,6 @@ function getNow() {
   var m = now.getMinutes() >= 30 ? '30' : '00';
   document.getElementById('hour').value = h;
   document.getElementById('minute').value = m;
-  document.getElementById('c_hour').value = h;
-  document.getElementById('c_minute').value = m;
   updateHint();
 }
 
@@ -244,8 +228,6 @@ function doFlash(btnId, originalText, textToCopy) {
 
 document.getElementById('hour').addEventListener('change', updateHint);
 document.getElementById('minute').addEventListener('change', updateHint);
-document.getElementById('c_hour').addEventListener('change', updateCompare);
-document.getElementById('c_minute').addEventListener('change', updateCompare);
 
 buildHours();
 getNow();
