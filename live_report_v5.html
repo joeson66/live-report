@@ -28,12 +28,16 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Helvetica
 .trow select { flex: 1; border: 0.5px solid rgba(0,0,0,0.2); border-radius: 8px; padding: 9px 10px; font-size: 15px; background: #f5f5f0; color: #1a1a1a; }
 .hint { font-size: 12px; color: #888; margin-top: 6px; }
 .psm { font-size: 13px; color: #888; background: #f5f5f0; border-radius: 8px; padding: 8px 12px; margin-bottom: 10px; display: none; }
-.hrow { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 0.5px solid rgba(0,0,0,0.07); }
+.hrow { padding: 10px 0; border-bottom: 0.5px solid rgba(0,0,0,0.07); }
 .hrow:last-child { border-bottom: none; }
+.hrow-top { display: flex; justify-content: space-between; align-items: center; }
+.hrow-sub { display: flex; gap: 16px; margin-top: 4px; }
+.hrow-sub span { font-size: 13px; color: #888; }
+.hrow-sub b { font-weight: 500; color: #1a1a1a; }
 .hempty { font-size: 14px; color: #bbb; text-align: center; padding: 12px 0; }
 .hdr { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
 .clrbtn { font-size: 12px; color: #888; cursor: pointer; background: none; border: none; padding: 0; }
-.date-badge { font-size: 12px; color: #888; background: #f5f5f0; border-radius: 6px; padding: 3px 8px; }
+.date-badge { font-size: 12px; color: #888; }
 </style>
 </head>
 <body>
@@ -50,7 +54,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Helvetica
   </div>
 
   <div class="card">
-    <div class="stitle">本次数据（从平台抄）</div>
+    <div class="stitle">本次数据（从平台填）</div>
     <div class="two">
       <div class="fg"><label>累计 GMV（元）</label><input type="number" id="gmv" placeholder="82920" oninput="update()"></div>
       <div class="fg"><label>累计消耗（元）</label><input type="number" id="cost" placeholder="1530" oninput="update()"></div>
@@ -71,7 +75,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Helvetica
   <div class="card">
     <div class="hdr">
       <div>
-        <div class="stitle" style="margin-bottom:4px">时段 GMV 历史</div>
+        <div class="stitle" style="margin-bottom:4px">时段历史</div>
         <span class="date-badge" id="today-badge"></span>
       </div>
       <button class="clrbtn" onclick="clearHistory()">清空今日</button>
@@ -92,157 +96,162 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Helvetica
 
 </div>
 <script>
-var prevGMV = null, prevTime = null, hist = [];
+var prevGMV=null,prevTime=null,prevCost=null,hist=[];
 
-function todayKey() {
-  var d = new Date();
-  return d.getFullYear() + '-' + pad(d.getMonth()+1) + '-' + pad(d.getDate());
+function todayKey(){var d=new Date();return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());}
+
+function saveState(){
+  var k=todayKey();
+  localStorage.setItem('lrd_hist_'+k,JSON.stringify(hist));
+  localStorage.setItem('lrd_prevGMV_'+k,prevGMV!==null?String(prevGMV):'');
+  localStorage.setItem('lrd_prevTime_'+k,prevTime!==null?prevTime:'');
+  localStorage.setItem('lrd_prevCost_'+k,prevCost!==null?String(prevCost):'');
 }
 
-function saveState() {
-  var key = todayKey();
-  localStorage.setItem('lrd_hist_' + key, JSON.stringify(hist));
-  localStorage.setItem('lrd_prevGMV_' + key, prevGMV !== null ? String(prevGMV) : '');
-  localStorage.setItem('lrd_prevTime_' + key, prevTime !== null ? prevTime : '');
+function loadState(){
+  var k=todayKey();
+  var h=localStorage.getItem('lrd_hist_'+k);
+  hist=h?JSON.parse(h):[];
+  var pg=localStorage.getItem('lrd_prevGMV_'+k);
+  prevGMV=(pg!==null&&pg!=='')?parseFloat(pg):null;
+  var pt=localStorage.getItem('lrd_prevTime_'+k);
+  prevTime=(pt!==null&&pt!=='')?pt:null;
+  var pc=localStorage.getItem('lrd_prevCost_'+k);
+  prevCost=(pc!==null&&pc!=='')?parseFloat(pc):null;
 }
 
-function loadState() {
-  var key = todayKey();
-  var h = localStorage.getItem('lrd_hist_' + key);
-  hist = h ? JSON.parse(h) : [];
-  var pg = localStorage.getItem('lrd_prevGMV_' + key);
-  prevGMV = (pg !== null && pg !== '') ? parseFloat(pg) : null;
-  var pt = localStorage.getItem('lrd_prevTime_' + key);
-  prevTime = (pt !== null && pt !== '') ? pt : null;
+function pad(n){return String(n).padStart(2,'0');}
+function fmt(n){return String(Math.round(n));}
+function getT(){return document.getElementById('hour').value+':'+document.getElementById('minute').value;}
+
+function buildHours(){
+  var s=document.getElementById('hour');
+  for(var i=0;i<=23;i++){var o=document.createElement('option');o.value=pad(i);o.textContent=pad(i);s.appendChild(o);}
 }
 
-function pad(n) { return String(n).padStart(2,'0'); }
-function fmt(n) { return String(Math.round(n)); }
-function getT() { return document.getElementById('hour').value + ':' + document.getElementById('minute').value; }
-
-function buildHours() {
-  var s = document.getElementById('hour');
-  for (var i = 0; i <= 23; i++) {
-    var o = document.createElement('option');
-    o.value = pad(i); o.textContent = pad(i);
-    s.appendChild(o);
-  }
-}
-
-function getNow() {
-  var n = new Date();
-  document.getElementById('hour').value = pad(n.getHours());
-  document.getElementById('minute').value = n.getMinutes() >= 30 ? '30' : '00';
-  var d = n.getFullYear() + '年' + (n.getMonth()+1) + '月' + n.getDate() + '日';
-  document.getElementById('today-badge').textContent = d;
+function getNow(){
+  var n=new Date();
+  document.getElementById('hour').value=pad(n.getHours());
+  document.getElementById('minute').value=n.getMinutes()>=30?'30':'00';
+  var d=n.getFullYear()+'年'+(n.getMonth()+1)+'月'+n.getDate()+'日';
+  document.getElementById('today-badge').textContent=d;
   updateHint();
 }
 
-function updateHint() {
-  var sm = document.getElementById('prev-summary');
-  if (prevTime !== null && prevGMV !== null) {
-    document.getElementById('hint').textContent = '上一时段：' + prevTime + '  累计GMV：' + fmt(prevGMV);
-    sm.style.display = 'block';
-    sm.textContent = '上次存档：' + prevTime + '  累计GMV ' + fmt(prevGMV);
+function updateHint(){
+  var sm=document.getElementById('prev-summary');
+  if(prevTime!==null&&prevGMV!==null){
+    document.getElementById('hint').textContent='上一时段：'+prevTime+'  累计GMV：'+fmt(prevGMV);
+    sm.style.display='block';
+    sm.textContent='上次存档：'+prevTime+'  累计GMV '+fmt(prevGMV);
   } else {
-    document.getElementById('hint').textContent = '首次报数，无需上一时段数据';
-    sm.style.display = 'none';
+    document.getElementById('hint').textContent='首次报数，无需上一时段数据';
+    sm.style.display='none';
   }
   update();
 }
 
-function update() {
-  var t = getT();
-  var gmv = parseFloat(document.getElementById('gmv').value);
-  var cost = parseFloat(document.getElementById('cost').value);
-  var roiM = document.getElementById('roi_manual').value;
-  var roi = '—';
-  if (!isNaN(gmv) && !isNaN(cost) && cost > 0) roi = (gmv / cost).toFixed(2);
-  if (roiM !== '') roi = parseFloat(roiM).toFixed(2);
-  document.getElementById('roi_val').textContent = roi;
-  var lines = [];
-  if (!isNaN(gmv) || !isNaN(cost) || roi !== '—') {
+function update(){
+  var t=getT();
+  var gmv=parseFloat(document.getElementById('gmv').value);
+  var cost=parseFloat(document.getElementById('cost').value);
+  var roiM=document.getElementById('roi_manual').value;
+  var roi='—';
+  if(!isNaN(gmv)&&!isNaN(cost)&&cost>0)roi=(gmv/cost).toFixed(2);
+  if(roiM!=='')roi=parseFloat(roiM).toFixed(2);
+  document.getElementById('roi_val').textContent=roi;
+  var lines=[];
+  if(!isNaN(gmv)||!isNaN(cost)||roi!=='—'){
     lines.push(t);
-    if (!isNaN(gmv)) lines.push('GMV：' + fmt(gmv));
-    if (!isNaN(cost)) lines.push('消耗：' + cost.toFixed(2));
-    if (roi !== '—') lines.push('ROI：' + roi);
-    if (!isNaN(gmv) && prevGMV !== null && prevTime !== null)
-      lines.push(prevTime + '-' + t + ' GMV：' + fmt(gmv - prevGMV));
+    if(!isNaN(gmv))lines.push('GMV：'+fmt(gmv));
+    if(!isNaN(cost))lines.push('消耗：'+cost.toFixed(2));
+    if(roi!=='—')lines.push('ROI：'+roi);
+    if(!isNaN(gmv)&&prevGMV!==null&&prevTime!==null){
+      var pGMV=gmv-prevGMV;
+      lines.push(prevTime+'-'+t+' GMV：'+fmt(pGMV));
+      if(!isNaN(cost)&&prevCost!==null){
+        var pCost=cost-prevCost;
+        if(pCost>0)lines.push(prevTime+'-'+t+' ROI：'+(pGMV/pCost).toFixed(2));
+      }
+    }
   }
-  document.getElementById('preview').textContent = lines.length ? lines.join('\n') : '填写数据后自动生成...';
+  document.getElementById('preview').textContent=lines.length?lines.join('\n'):'填写数据后自动生成...';
 }
 
-function renderHist() {
-  var el = document.getElementById('hlist');
-  if (hist.length === 0) { el.innerHTML = '<div class="hempty">发送后自动记录</div>'; return; }
-  el.innerHTML = hist.map(function(r) {
-    return '<div class="hrow"><span style="font-size:14px;color:#888">' + r.p + '</span><span style="font-size:15px;font-weight:500;color:#1a1a1a">GMV ' + fmt(r.g) + '</span></div>';
+function renderHist(){
+  var el=document.getElementById('hlist');
+  if(hist.length===0){el.innerHTML='<div class="hempty">发送后自动记录</div>';return;}
+  el.innerHTML=hist.map(function(r){
+    return '<div class="hrow">'
+      +'<div class="hrow-top"><span style="font-size:14px;color:#888">'+r.p+'</span></div>'
+      +'<div class="hrow-sub"><span>GMV <b>'+fmt(r.g)+'</b></span><span>ROI <b>'+(r.roi||'—')+'</b></span></div>'
+      +'</div>';
   }).join('');
 }
 
-function nextPeriod() {
-  var gmv = parseFloat(document.getElementById('gmv').value), t = getT();
-  if (!isNaN(gmv) && prevGMV !== null && prevTime !== null) {
-    hist.push({ p: prevTime + '-' + t, g: gmv - prevGMV });
+function nextPeriod(){
+  var gmv=parseFloat(document.getElementById('gmv').value);
+  var cost=parseFloat(document.getElementById('cost').value);
+  var t=getT();
+  if(!isNaN(gmv)&&prevGMV!==null&&prevTime!==null){
+    var pGMV=gmv-prevGMV;
+    var pROI=null;
+    if(!isNaN(cost)&&prevCost!==null){var pCost=cost-prevCost;if(pCost>0)pROI=(pGMV/pCost).toFixed(2);}
+    hist.push({p:prevTime+'-'+t,g:pGMV,roi:pROI});
     renderHist();
   }
-  if (!isNaN(gmv)) { prevGMV = gmv; prevTime = t; }
+  if(!isNaN(gmv)){prevGMV=gmv;prevTime=t;}
+  if(!isNaN(cost))prevCost=cost;
   saveState();
-  ['gmv','cost','roi_manual'].forEach(function(id) { document.getElementById(id).value = ''; });
-  document.getElementById('roi_val').textContent = '—';
-  document.getElementById('preview').textContent = '填写数据后自动生成...';
+  ['gmv','cost','roi_manual'].forEach(function(id){document.getElementById(id).value='';});
+  document.getElementById('roi_val').textContent='—';
+  document.getElementById('preview').textContent='填写数据后自动生成...';
   updateHint();
 }
 
-function clearHistory() {
-  if (!confirm('清空今日所有历史记录？')) return;
-  hist = []; prevGMV = null; prevTime = null;
-  saveState();
-  renderHist();
-  updateHint();
+function clearHistory(){
+  if(!confirm('清空今日所有历史记录？'))return;
+  hist=[];prevGMV=null;prevTime=null;prevCost=null;
+  saveState();renderHist();updateHint();
 }
 
-function resetAll() {
-  if (!confirm('重新开播会清空所有数据，确认？')) return;
-  prevGMV = null; prevTime = null; hist = [];
+function resetAll(){
+  if(!confirm('重新开播会清空所有数据，确认？'))return;
+  prevGMV=null;prevTime=null;prevCost=null;hist=[];
   saveState();
-  ['gmv','cost','roi_manual'].forEach(function(id) { document.getElementById(id).value = ''; });
-  document.getElementById('roi_val').textContent = '—';
-  document.getElementById('preview').textContent = '填写数据后自动生成...';
-  document.getElementById('prev-summary').style.display = 'none';
-  document.getElementById('hint').textContent = '首次报数，无需上一时段数据';
+  ['gmv','cost','roi_manual'].forEach(function(id){document.getElementById(id).value='';});
+  document.getElementById('roi_val').textContent='—';
+  document.getElementById('preview').textContent='填写数据后自动生成...';
+  document.getElementById('prev-summary').style.display='none';
+  document.getElementById('hint').textContent='首次报数，无需上一时段数据';
   renderHist();
 }
 
-function updateCompare() {
-  var off = document.getElementById('gmv_official').value.trim();
-  var kol = document.getElementById('gmv_kol').value.trim();
-  var t = getT();
-  if (off === '' && kol === '') { document.getElementById('compare_text').textContent = '填写数据后自动生成...'; return; }
-  document.getElementById('compare_text').textContent = '官号/达人 ' + t + ' ' + (off !== '' ? off + 'w' : '—') + '/' + (kol !== '' ? kol + 'w' : '—');
+function updateCompare(){
+  var off=document.getElementById('gmv_official').value.trim();
+  var kol=document.getElementById('gmv_kol').value.trim();
+  var t=getT();
+  if(off===''&&kol===''){document.getElementById('compare_text').textContent='填写数据后自动生成...';return;}
+  document.getElementById('compare_text').textContent='官号/达人 '+t+' '+(off!==''?off+'w':'—')+'/'+(kol!==''?kol+'w':'—');
 }
 
-function copyText() { doFlash('copyBtn', '一键复制，发微信群', document.getElementById('preview').textContent); }
-function copyCompare() { doFlash('compareCopyBtn', '一键复制，发微信群', document.getElementById('compare_text').textContent); }
-function resetCompare() {
-  ['gmv_official','gmv_kol'].forEach(function(id) { document.getElementById(id).value = ''; });
-  document.getElementById('compare_text').textContent = '填写数据后自动生成...';
+function copyText(){doFlash('copyBtn','一键复制，发微信群',document.getElementById('preview').textContent);}
+function copyCompare(){doFlash('compareCopyBtn','一键复制，发微信群',document.getElementById('compare_text').textContent);}
+function resetCompare(){
+  ['gmv_official','gmv_kol'].forEach(function(id){document.getElementById(id).value='';});
+  document.getElementById('compare_text').textContent='填写数据后自动生成...';
 }
 
-function doFlash(id, orig, text) {
-  if (text === '填写数据后自动生成...') return;
-  var btn = document.getElementById(id);
-  var done = function() {
-    btn.textContent = '已复制！去粘贴到微信群';
-    btn.classList.add('copied');
-    setTimeout(function() { btn.textContent = orig; btn.classList.remove('copied'); }, 2000);
-  };
-  if (navigator.clipboard) navigator.clipboard.writeText(text).then(done);
-  else { var ta = document.createElement('textarea'); ta.value = text; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta); done(); }
+function doFlash(id,orig,text){
+  if(text==='填写数据后自动生成...')return;
+  var btn=document.getElementById(id);
+  var done=function(){btn.textContent='已复制！去粘贴到微信群';btn.classList.add('copied');setTimeout(function(){btn.textContent=orig;btn.classList.remove('copied');},2000);};
+  if(navigator.clipboard)navigator.clipboard.writeText(text).then(done);
+  else{var ta=document.createElement('textarea');ta.value=text;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);done();}
 }
 
-document.getElementById('hour').addEventListener('change', updateHint);
-document.getElementById('minute').addEventListener('change', updateHint);
+document.getElementById('hour').addEventListener('change',updateHint);
+document.getElementById('minute').addEventListener('change',updateHint);
 buildHours();
 loadState();
 renderHist();
