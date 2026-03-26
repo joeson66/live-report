@@ -36,7 +36,9 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Helvetica
 .hrow-sub b { font-weight: 500; color: #1a1a1a; }
 .hempty { font-size: 14px; color: #bbb; text-align: center; padding: 12px 0; }
 .hdr { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+.hdr-btns { display: flex; gap: 12px; }
 .clrbtn { font-size: 12px; color: #888; cursor: pointer; background: none; border: none; padding: 0; }
+.undobtn { font-size: 12px; color: #c0392b; cursor: pointer; background: none; border: none; padding: 0; display: none; }
 .date-badge { font-size: 12px; color: #888; }
 </style>
 </head>
@@ -78,7 +80,10 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Helvetica
         <div class="stitle" style="margin-bottom:4px">时段历史</div>
         <span class="date-badge" id="today-badge"></span>
       </div>
-      <button class="clrbtn" onclick="clearHistory()">清空今日</button>
+      <div class="hdr-btns">
+        <button class="undobtn" id="undobtn" onclick="undoLast()">撤回最后一条</button>
+        <button class="clrbtn" onclick="clearHistory()">清空今日</button>
+      </div>
     </div>
     <div id="hlist"><div class="hempty">发送后自动记录</div></div>
   </div>
@@ -96,7 +101,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Helvetica
 
 </div>
 <script>
-var prevGMV=null,prevTime=null,prevCost=null,hist=[];
+var prevGMV=null,prevTime=null,prevCost=null,hist=[],undoStack=[];
 
 function todayKey(){var d=new Date();return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());}
 
@@ -106,6 +111,7 @@ function saveState(){
   localStorage.setItem('lrd_prevGMV_'+k,prevGMV!==null?String(prevGMV):'');
   localStorage.setItem('lrd_prevTime_'+k,prevTime!==null?prevTime:'');
   localStorage.setItem('lrd_prevCost_'+k,prevCost!==null?String(prevCost):'');
+  localStorage.setItem('lrd_undo_'+k,JSON.stringify(undoStack));
 }
 
 function loadState(){
@@ -118,6 +124,8 @@ function loadState(){
   prevTime=(pt!==null&&pt!=='')?pt:null;
   var pc=localStorage.getItem('lrd_prevCost_'+k);
   prevCost=(pc!==null&&pc!=='')?parseFloat(pc):null;
+  var u=localStorage.getItem('lrd_undo_'+k);
+  undoStack=u?JSON.parse(u):[];
 }
 
 function pad(n){return String(n).padStart(2,'0');}
@@ -180,7 +188,9 @@ function update(){
 
 function renderHist(){
   var el=document.getElementById('hlist');
-  if(hist.length===0){el.innerHTML='<div class="hempty">发送后自动记录</div>';return;}
+  var ub=document.getElementById('undobtn');
+  if(hist.length===0){el.innerHTML='<div class="hempty">发送后自动记录</div>';ub.style.display='none';return;}
+  ub.style.display='block';
   el.innerHTML=hist.map(function(r){
     return '<div class="hrow">'
       +'<div class="hrow-top"><span style="font-size:14px;color:#888">'+r.p+'</span></div>'
@@ -193,6 +203,7 @@ function nextPeriod(){
   var gmv=parseFloat(document.getElementById('gmv').value);
   var cost=parseFloat(document.getElementById('cost').value);
   var t=getT();
+  undoStack.push({hist:JSON.parse(JSON.stringify(hist)),prevGMV:prevGMV,prevTime:prevTime,prevCost:prevCost});
   if(!isNaN(gmv)&&prevGMV!==null&&prevTime!==null){
     var pGMV=gmv-prevGMV;
     var pROI=null;
@@ -209,15 +220,27 @@ function nextPeriod(){
   updateHint();
 }
 
+function undoLast(){
+  if(undoStack.length===0)return;
+  var snap=undoStack.pop();
+  hist=snap.hist;
+  prevGMV=snap.prevGMV;
+  prevTime=snap.prevTime;
+  prevCost=snap.prevCost;
+  saveState();
+  renderHist();
+  updateHint();
+}
+
 function clearHistory(){
   if(!confirm('清空今日所有历史记录？'))return;
-  hist=[];prevGMV=null;prevTime=null;prevCost=null;
+  hist=[];prevGMV=null;prevTime=null;prevCost=null;undoStack=[];
   saveState();renderHist();updateHint();
 }
 
 function resetAll(){
   if(!confirm('重新开播会清空所有数据，确认？'))return;
-  prevGMV=null;prevTime=null;prevCost=null;hist=[];
+  prevGMV=null;prevTime=null;prevCost=null;hist=[];undoStack=[];
   saveState();
   ['gmv','cost','roi_manual'].forEach(function(id){document.getElementById(id).value='';});
   document.getElementById('roi_val').textContent='—';
