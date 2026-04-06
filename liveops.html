@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>乐园直播运营台</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0f0f11;
+  --bg2:#18181c;
+  --bg3:#222228;
+  --border:#2e2e38;
+  --text:#f0f0f0;
+  --text2:#9090a0;
+  --text3:#55555f;
+  --accent:#00d4a0;
+  --accent2:#00a87e;
+  --warn:#f59e0b;
+  --danger:#ef4444;
+  --blue:#3b82f6;
+  --radius:10px;
+  --radius2:14px;
+}
+body{font-family:'PingFang SC',-apple-system,BlinkMacSystemFont,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+
+/* NAV */
+.nav{display:flex;align-items:center;gap:0;border-bottom:1px solid var(--border);background:var(--bg2);padding:0 24px;position:sticky;top:0;z-index:100}
+.nav-logo{font-size:14px;font-weight:600;color:var(--accent);letter-spacing:.05em;padding:16px 24px 16px 0;border-right:1px solid var(--border);margin-right:8px}
+.nav-logo span{color:var(--text2);font-weight:400}
+.tab{padding:16px 18px;font-size:13px;color:var(--text2);cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;white-space:nowrap}
+.tab:hover{color:var(--text)}
+.tab.act{color:var(--accent);border-bottom-color:var(--accent)}
+.nav-right{margin-left:auto;display:flex;align-items:center;gap:12px}
+.live-badge{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2);padding:5px 12px;border:1px solid var(--border);border-radius:99px}
+.live-dot{width:7px;height:7px;border-radius:50%;background:var(--danger);animation:blink 1.4s ease-in-out infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+.timer-display{font-size:13px;font-weight:500;color:var(--text);font-variant-numeric:tabular-nums}
+
+/* LAYOUT */
+.page{display:none;padding:24px;max-width:1200px;margin:0 auto}
+.page.act{display:block}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.three-col{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}
+
+/* CARD */
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius2);padding:20px}
+.card-title{font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.1em;margin-bottom:16px}
+.card-title span{color:var(--accent);margin-left:6px;font-size:10px}
+
+/* FORM */
+.fg{display:flex;flex-direction:column;gap:5px;margin-bottom:12px}
+.fg label{font-size:12px;color:var(--text2)}
+.fg input,.fg textarea,.fg select{background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);padding:9px 12px;font-size:14px;color:var(--text);width:100%;outline:none;transition:border .15s;font-family:inherit}
+.fg input:focus,.fg textarea:focus,.fg select:focus{border-color:var(--accent)}
+.fg textarea{resize:vertical;min-height:70px;line-height:1.6}
+.two-fg{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+
+/* BUTTONS */
+.btn{padding:10px 18px;border-radius:var(--radius);font-size:13px;font-weight:500;cursor:pointer;border:none;transition:all .15s;font-family:inherit}
+.btn-primary{background:var(--accent);color:#000}
+.btn-primary:hover{background:var(--accent2)}
+.btn-ghost{background:transparent;color:var(--text2);border:1px solid var(--border)}
+.btn-ghost:hover{color:var(--text);border-color:var(--text3)}
+.btn-warn{background:rgba(245,158,11,.15);color:var(--warn);border:1px solid rgba(245,158,11,.3)}
+.btn-danger{background:rgba(239,68,68,.12);color:var(--danger);border:1px solid rgba(239,68,68,.25)}
+.btn-full{width:100%}
+.btn-sm{padding:6px 12px;font-size:12px}
+
+/* STAT ROW */
+.stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px}
+.stat{background:var(--bg3);border-radius:var(--radius);padding:14px;border:1px solid var(--border)}
+.stat-label{font-size:10px;color:var(--text3);margin-bottom:4px;text-transform:uppercase;letter-spacing:.06em}
+.stat-value{font-size:22px;font-weight:600;color:var(--text)}
+.stat-value.accent{color:var(--accent)}
+.stat-sub{font-size:11px;color:var(--text3);margin-top:3px}
+
+/* PREVIEW BOX */
+.preview-box{background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);padding:14px;font-size:14px;line-height:2;color:var(--text);white-space:pre-wrap;min-height:80px;font-variant-numeric:tabular-nums}
+
+/* HISTORY */
+.hist-item{padding:12px 0;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
+.hist-item:last-child{border-bottom:none}
+.hist-period{font-size:12px;color:var(--text2)}
+.hist-vals{display:flex;gap:16px}
+.hist-val{font-size:13px;font-weight:500}
+.hist-val span{font-size:11px;color:var(--text3);margin-right:4px}
+
+/* SCRIPT PANEL */
+.script-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.script-card{background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);padding:12px;cursor:pointer;transition:all .15s}
+.script-card:hover{border-color:var(--accent);background:rgba(0,212,160,.05)}
+.script-tag{font-size:10px;font-weight:600;letter-spacing:.06em;margin-bottom:6px}
+.script-tag.人气{color:var(--warn)}
+.script-tag.转化{color:var(--accent)}
+.script-tag.场景{color:var(--blue)}
+.script-tag.催单{color:var(--danger)}
+.script-title{font-size:13px;color:var(--text);font-weight:500;margin-bottom:4px}
+.script-preview{font-size:11px;color:var(--text3);line-height:1.5;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.script-sent{border-color:var(--accent)!important;background:rgba(0,212,160,.08)!important}
+
+/* ALERT BOX */
+.alert-box{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);border-radius:var(--radius);padding:12px 16px;display:flex;align-items:center;gap:10px;margin-bottom:16px;display:none}
+.alert-box.show{display:flex}
+.alert-icon{font-size:16px}
+.alert-text{font-size:13px;color:var(--danger)}
+
+/* KOLS */
+.kol-row{display:grid;grid-template-columns:auto 1fr auto auto auto;gap:12px;align-items:center;padding:12px 0;border-bottom:1px solid var(--border);font-size:13px}
+.kol-row:last-child{border-bottom:none}
+.kol-name{font-weight:500}
+.kol-product{font-size:12px;color:var(--text2)}
+.kol-gmv{font-weight:600;color:var(--accent)}
+.tier-badge{font-size:10px;padding:3px 8px;border-radius:99px;font-weight:600}
+.tier-1{background:rgba(245,158,11,.15);color:var(--warn)}
+.tier-2{background:rgba(0,212,160,.15);color:var(--accent)}
+.tier-3{background:rgba(239,68,68,.15);color:var(--danger)}
+.tier-bar-wrap{height:4px;background:var(--bg3);border-radius:99px;overflow:hidden;width:80px}
+.tier-bar{height:100%;border-radius:99px;background:var(--accent);transition:width .4s}
+
+/* REVIEW */
+.prob-block{background:var(--bg3);border-radius:var(--radius);padding:14px;margin-bottom:10px;border-left:3px solid var(--warn)}
+.prob-label{font-size:10px;color:var(--warn);font-weight:600;letter-spacing:.06em;margin-bottom:6px}
+.review-out{background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);padding:16px;font-size:13px;line-height:2;color:var(--text);white-space:pre-wrap;min-height:100px}
+
+/* MODAL */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;display:none;align-items:center;justify-content:center}
+.modal-bg.show{display:flex}
+.modal{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius2);padding:24px;width:520px;max-width:90vw}
+.modal-title{font-size:15px;font-weight:600;margin-bottom:16px}
+.modal-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:16px}
+
+/* TAGS */
+.tag{display:inline-block;font-size:10px;padding:2px 7px;border-radius:99px;font-weight:600}
+.tag-on{background:rgba(0,212,160,.15);color:var(--accent)}
+.tag-off{background:var(--bg3);color:var(--text3)}
+
+.row-flex{display:flex;gap:10px;align-items:flex-start}
+.row-flex .btn{white-space:nowrap;margin-top:22px}
+.section-gap{margin-bottom:20px}
+.divider{border:none;border-top:1px solid var(--border);margin:16px 0}
+.hint{font-size:11px;color:var(--text3);margin-top:4px}
+.copied-flash{background:var(--accent2)!important;color:#000!important}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-logo">乐园直播<span>运营台</span></div>
+  <div class="tab act" onclick="showPage('report')">📊 直播报数</div>
+  <div class="tab" onclick="showPage('script')">💬 话术提醒</div>
+  <div class="tab" onclick="showPage('kol')">👥 达人管理</div>
+  <div class="tab" onclick="showPage('review')">📋 播后复盘</div>
+  <div class="nav-right">
+    <div class="live-badge"><div class="live-dot"></div><span id="live-status">直播中</span></div>
+    <div class="timer-display" id="nav-timer">00:00:00</div>
+  </div>
+</nav>
+
+<!-- ① 报数页 -->
+<div class="page act" id="page-report">
+  <div class="stat-row">
+    <div class="stat"><div class="stat-label">累计 GMV</div><div class="stat-value accent" id="s-gmv">—</div><div class="stat-sub">元</div></div>
+    <div class="stat"><div class="stat-label">累计消耗</div><div class="stat-value" id="s-cost">—</div><div class="stat-sub">元</div></div>
+    <div class="stat"><div class="stat-label">全域 ROI</div><div class="stat-value accent" id="s-roi">—</div><div class="stat-sub">实时</div></div>
+    <div class="stat"><div class="stat-label">当前时段</div><div class="stat-value" id="s-period" style="font-size:16px">—</div><div class="stat-sub" id="s-period-sub">等待首次报数</div></div>
+  </div>
+
+  <div class="two-col">
+    <div>
+      <div class="card section-gap">
+        <div class="card-title">本次数据 <span>从平台填入</span></div>
+        <div class="row-flex">
+          <div style="flex:1">
+            <div class="fg"><label>报数时间</label>
+              <div style="display:flex;gap:8px">
+                <select id="hour" style="flex:1"></select>
+                <select id="minute" style="width:80px"><option value="00">00</option><option value="30">30</option></select>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="two-fg">
+          <div class="fg"><label>累计 GMV（元）</label><input type="number" id="gmv" placeholder="82920" oninput="update()"/></div>
+          <div class="fg"><label>累计消耗（元）</label><input type="number" id="cost" placeholder="1530" oninput="update()"/></div>
+        </div>
+        <div class="fg"><label>ROI（可手动覆盖，否则自动算）</label><input type="number" id="roi_manual" placeholder="自动计算" oninput="update()"/></div>
+        <div class="hint" id="prev-hint">首次报数，无上一时段数据</div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">预览报文</div>
+        <div class="preview-box" id="preview">填写数据后自动生成...</div>
+        <div style="display:flex;gap:8px;margin-top:12px">
+          <button class="btn btn-primary btn-full" id="copyBtn" onclick="copyReport()">一键复制 发微信群</button>
+          <button class="btn btn-ghost" onclick="nextPeriod()">下一时段 →</button>
+        </div>
+        <button class="btn btn-ghost btn-full" style="margin-top:8px;color:var(--danger);border-color:rgba(239,68,68,.3)" onclick="resetAll()">重新开播（清空）</button>
+      </div>
+    </div>
+
+    <div>
+      <div class="card">
+        <div class="card-title">时段历史</div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+          <span style="font-size:12px;color:var(--text2)" id="today-label"></span>
+          <div style="display:flex;gap:10px">
+            <button class="btn btn-ghost btn-sm" id="undobtn" style="display:none;color:var(--warn)" onclick="undoLast()">撤回上条</button>
+            <button class="btn btn-ghost btn-sm" onclick="clearHistory()">清空</button>
+          </div>
+        </div>
+        <div id="hlist"><div style="font-size:13px;color:var(--text3);text-align:center;padding:20px">发送后自动记录</div></div>
+      </div>
+
+      <div class="card" style="margin-top:16px">
+        <div class="card-title">官号 / 达人 GMV 对比</div>
+        <div class="two-fg">
+          <div class="fg"><label>官号 GMV（万）</label><input type="text" id="gmv_off" placeholder="5.5" oninput="updateCompare()"/></div>
+          <div class="fg"><label>达人 GMV（万）</label><input type="text" id="gmv_kol" placeholder="2.3" oninput="updateCompare()"/></div>
+        </div>
+        <div class="preview-box" id="compare_box" style="min-height:48px">填写后自动生成...</div>
+        <button class="btn btn-primary btn-full" style="margin-top:10px" id="compareCopyBtn" onclick="copyCompare()">复制对比报文</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ② 话术提醒 -->
+<div class="page" id="page-script">
+  <div class="two-col">
+    <div>
+      <div class="card section-gap">
+        <div class="card-title">当前直播状态</div>
+        <div class="two-fg">
+          <div class="fg"><label>当前在线人数</label><input type="number" id="sc-online" placeholder="320" oninput="checkAlert()"/></div>
+          <div class="fg"><label>当前转化率 (%)</label><input type="number" id="sc-cvr" placeholder="3.5" step="0.1" oninput="checkAlert()"/></div>
+        </div>
+        <div class="two-fg">
+          <div class="fg"><label>上一时段在线人数</label><input type="number" id="sc-online-prev" placeholder="450"/></div>
+          <div class="fg"><label>上一时段转化率 (%)</label><input type="number" id="sc-cvr-prev" placeholder="4.2" step="0.1"/></div>
+        </div>
+        <div class="alert-box" id="alert-box">
+          <span class="alert-icon">⚠️</span>
+          <span class="alert-text" id="alert-text">数据下滑，建议调整话术</span>
+        </div>
+        <div class="fg"><label>当前场景</label>
+          <select id="sc-scene">
+            <option value="室外">室外场景</option>
+            <option value="室内">室内场景</option>
+            <option value="特定区域">特定游乐区域</option>
+            <option value="自定义">自定义</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">发送记录</div>
+        <div id="sent-log" style="font-size:12px;color:var(--text3)">暂无发送记录</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">话术库 <span>点击即复制发给主播</span></div>
+
+      <div style="margin-bottom:10px;display:flex;gap:6px;flex-wrap:wrap" id="script-filter">
+        <button class="btn btn-ghost btn-sm act-filter" data-f="all" onclick="filterScript('all',this)">全部</button>
+        <button class="btn btn-ghost btn-sm" data-f="人气" onclick="filterScript('人气',this)">人气下滑</button>
+        <button class="btn btn-ghost btn-sm" data-f="转化" onclick="filterScript('转化',this)">转化低</button>
+        <button class="btn btn-ghost btn-sm" data-f="场景" onclick="filterScript('场景',this)">场景切换</button>
+        <button class="btn btn-ghost btn-sm" data-f="催单" onclick="filterScript('催单',this)">催单</button>
+      </div>
+      <div class="script-grid" id="script-grid"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ③ 达人管理 -->
+<div class="page" id="page-kol">
+  <div class="two-col">
+    <div class="card">
+      <div class="card-title">今日在播达人</div>
+      <div id="kol-list"><div style="font-size:13px;color:var(--text3);text-align:center;padding:20px">暂无达人，点击右侧添加</div></div>
+    </div>
+
+    <div>
+      <div class="card section-gap">
+        <div class="card-title">添加 / 编辑达人</div>
+        <div class="fg"><label>达人昵称</label><input type="text" id="k-name" placeholder="抖音达人名"/></div>
+        <div class="two-fg">
+          <div class="fg"><label>合作商品</label><input type="text" id="k-product" placeholder="亲子票、年卡"/></div>
+          <div class="fg"><label>基础佣金 (%)</label><input type="number" id="k-base" placeholder="10" step="0.5"/></div>
+        </div>
+        <div class="fg"><label>今日 GMV（元）</label><input type="number" id="k-gmv" placeholder="0" oninput="updateTier()"/></div>
+        <div class="fg"><label>直播状态</label>
+          <select id="k-status"><option value="直播中">直播中</option><option value="已结束">已结束</option><option value="预约">预约</option></select>
+        </div>
+        <hr class="divider"/>
+        <div class="card-title">阶梯佣金设置</div>
+        <div id="tier-rows">
+          <div class="two-fg" style="margin-bottom:8px">
+            <div class="fg"><label>第一阶梯 GMV ≥（元）</label><input type="number" id="t1-gmv" placeholder="50000" oninput="updateTier()"/></div>
+            <div class="fg"><label>升至佣金 (%)</label><input type="number" id="t1-rate" placeholder="13" step="0.5"/></div>
+          </div>
+          <div class="two-fg" style="margin-bottom:8px">
+            <div class="fg"><label>第二阶梯 GMV ≥（元）</label><input type="number" id="t2-gmv" placeholder="100000" oninput="updateTier()"/></div>
+            <div class="fg"><label>升至佣金 (%)</label><input type="number" id="t2-rate" placeholder="16" step="0.5"/></div>
+          </div>
+        </div>
+        <div id="tier-preview" style="font-size:12px;color:var(--accent);margin-bottom:12px"></div>
+        <button class="btn btn-primary btn-full" onclick="addKol()">保存达人</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ④ 播后复盘 -->
+<div class="page" id="page-review">
+  <div class="two-col">
+    <div>
+      <div class="card section-gap">
+        <div class="card-title">今日数据摘要</div>
+        <div class="two-fg">
+          <div class="fg"><label>最终 GMV（元）</label><input type="number" id="rv-gmv" placeholder="188000" oninput="buildReview()"/></div>
+          <div class="fg"><label>最终消耗（元）</label><input type="number" id="rv-cost" placeholder="42000" oninput="buildReview()"/></div>
+        </div>
+        <div class="two-fg">
+          <div class="fg"><label>最终 ROI</label><input type="number" id="rv-roi" placeholder="自动算" oninput="buildReview()"/></div>
+          <div class="fg"><label>直播时长（小时）</label><input type="number" id="rv-hours" placeholder="10" step="0.5" oninput="buildReview()"/></div>
+        </div>
+      </div>
+
+      <div class="card section-gap">
+        <div class="card-title">问题记录</div>
+        <div id="prob-list"></div>
+        <button class="btn btn-ghost btn-full" onclick="addProblem()">+ 添加问题</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">复盘报告预览</div>
+      <div class="review-out" id="review-out">填写左侧数据后自动生成...</div>
+      <button class="btn btn-primary btn-full" style="margin-top:12px" id="reviewCopyBtn" onclick="copyReview()">复制复盘报告</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: 话术详情 -->
+<div class="modal-bg" id="modal-script">
+  <div class="modal">
+    <div class="modal-title" id="modal-script-title"></div>
+    <div style="font-size:13px;line-height:1.9;color:var(--text);background:var(--bg3);border-radius:var(--radius);padding:14px;margin-bottom:4px;white-space:pre-wrap" id="modal-script-body"></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal()">关闭</button>
+      <button class="btn btn-primary" id="modal-copy-btn" onclick="copyScript()">复制发给主播</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─── STATE ───
+var prevGMV=null,prevTime=null,prevCost=null,hist=[],undoStack=[];
+var kols=[];
+var problems=[];
+var sentLog=[];
+
+// ─── TIMER ───
+var liveStart=Date.now();
+function updateTimer(){
+  var e=Math.floor((Date.now()-liveStart)/1000);
+  var h=String(Math.floor(e/3600)).padStart(2,'0');
+  var m=String(Math.floor((e%3600)/60)).padStart(2,'0');
+  var s=String(e%60).padStart(2,'0');
+  document.getElementById('nav-timer').textContent=h+':'+m+':'+s;
+}
+setInterval(updateTimer,1000);
+
+// ─── TABS ───
+function showPage(id){
+  document.querySelectorAll('.page').forEach(function(p){p.classList.remove('act')});
+  document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('act')});
+  document.getElementById('page-'+id).classList.add('act');
+  event.target.classList.add('act');
+}
+
+// ─── DATE / TIME ───
+function pad(n){return String(n).padStart(2,'0')}
+function todayKey(){var d=new Date();return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())}
+function buildHours(){
+  var s=document.getElementById('hour');
+  for(var i=0;i<=23;i++){var o=document.createElement('option');o.value=pad(i);o.textContent=pad(i);s.appendChild(o);}
+}
+function initTime(){
+  var n=new Date();
+  document.getElementById('hour').value=pad(n.getHours());
+  document.getElementById('minute').value=n.getMinutes()>=30?'30':'00';
+  var d=n.getFullYear()+'年'+(n.getMonth()+1)+'月'+n.getDate()+'日';
+  document.getElementById('today-label').textContent=d;
+}
+function getT(){return document.getElementById('hour').value+':'+document.getElementById('minute').value}
+
+// ─── PERSIST ───
+function saveState(){
+  var k=todayKey();
+  localStorage.setItem('lo_hist_'+k,JSON.stringify(hist));
+  localStorage.setItem('lo_prev_'+k,JSON.stringify({g:prevGMV,t:prevTime,c:prevCost}));
+  localStorage.setItem('lo_undo_'+k,JSON.stringify(undoStack));
+  localStorage.setItem('lo_kols',JSON.stringify(kols));
+  localStorage.setItem('lo_probs_'+k,JSON.stringify(problems));
+}
+function loadState(){
+  var k=todayKey();
+  var h=localStorage.getItem('lo_hist_'+k);hist=h?JSON.parse(h):[];
+  var p=localStorage.getItem('lo_prev_'+k);
+  if(p){var o=JSON.parse(p);prevGMV=o.g;prevTime=o.t;prevCost=o.c;}
+  var u=localStorage.getItem('lo_undo_'+k);undoStack=u?JSON.parse(u):[];
+  var kk=localStorage.getItem('lo_kols');kols=kk?JSON.parse(kk):[];
+  var pr=localStorage.getItem('lo_probs_'+k);problems=pr?JSON.parse(pr):[];
+}
+
+// ─── REPORT ───
+function fmt(n){return Math.round(n).toLocaleString('zh-CN')}
+function update(){
+  var gmv=parseFloat(document.getElementById('gmv').value);
+  var cost=parseFloat(document.getElementById('cost').value);
+  var roiM=document.getElementById('roi_manual').value;
+  var roi='—';
+  if(!isNaN(gmv)&&!isNaN(cost)&&cost>0)roi=(gmv/cost).toFixed(2);
+  if(roiM!=='')roi=parseFloat(roiM).toFixed(2);
+  document.getElementById('s-roi').textContent=roi==='—'?'—':roi;
+  if(!isNaN(gmv))document.getElementById('s-gmv').textContent=fmt(gmv);
+  if(!isNaN(cost))document.getElementById('s-cost').textContent=fmt(cost);
+  var t=getT();
+  document.getElementById('s-period').textContent=t;
+  var hint='首次报数，无上一时段数据';
+  if(prevTime!==null&&prevGMV!==null)hint='上次：'+prevTime+'  累计GMV '+fmt(prevGMV);
+  document.getElementById('prev-hint').textContent=hint;
+  var lines=[];
+  if(!isNaN(gmv)||!isNaN(cost)||roi!=='—'){
+    lines.push(t);
+    if(!isNaN(gmv))lines.push('GMV：'+fmt(gmv));
+    if(!isNaN(cost))lines.push('消耗：'+cost.toFixed(2));
+    if(roi!=='—')lines.push('ROI：'+roi);
+    if(!isNaN(gmv)&&prevGMV!==null&&prevTime!==null){
+      var dg=gmv-prevGMV;
+      lines.push(prevTime+'-'+t+' GMV：'+fmt(dg));
+      if(!isNaN(cost)&&prevCost!==null){var dc=cost-prevCost;if(dc>0)lines.push(prevTime+'-'+t+' ROI：'+(dg/dc).toFixed(2));}
+    }
+  }
+  document.getElementById('preview').textContent=lines.length?lines.join('\n'):'填写数据后自动生成...';
+}
+function nextPeriod(){
+  var gmv=parseFloat(document.getElementById('gmv').value);
+  var cost=parseFloat(document.getElementById('cost').value);
+  var t=getT();
+  undoStack.push({hist:JSON.parse(JSON.stringify(hist)),prevGMV:prevGMV,prevTime:prevTime,prevCost:prevCost});
+  if(!isNaN(gmv)&&prevGMV!==null&&prevTime!==null){
+    var dg=gmv-prevGMV;
+    var pROI=null;
+    if(!isNaN(cost)&&prevCost!==null){var dc=cost-prevCost;if(dc>0)pROI=(dg/dc).toFixed(2);}
+    hist.push({p:prevTime+'-'+t,g:dg,roi:pROI,gmvTotal:gmv,costTotal:cost});
+    renderHist();
+  }
+  if(!isNaN(gmv)){prevGMV=gmv;prevTime=t;}
+  if(!isNaN(cost))prevCost=cost;
+  saveState();
+  ['gmv','cost','roi_manual'].forEach(function(id){document.getElementById(id).value='';});
+  document.getElementById('s-roi').textContent='—';
+  document.getElementById('preview').textContent='填写数据后自动生成...';
+  document.getElementById('prev-hint').textContent='上次：'+t+'  累计GMV '+fmt(prevGMV||0);
+}
+function renderHist(){
+  var el=document.getElementById('hlist');
+  var ub=document.getElementById('undobtn');
+  if(!hist.length){el.innerHTML='<div style="font-size:13px;color:var(--text3);text-align:center;padding:20px">发送后自动记录</div>';ub.style.display='none';return;}
+  ub.style.display='';
+  el.innerHTML=hist.map(function(r){
+    return '<div class="hist-item"><div><div class="hist-period">'+r.p+'</div></div><div class="hist-vals"><div class="hist-val"><span>GMV</span>'+fmt(r.g)+'</div><div class="hist-val"><span>ROI</span>'+(r.roi||'—')+'</div></div></div>';
+  }).join('');
+}
+function undoLast(){
+  if(!undoStack.length)return;
+  var s=undoStack.pop();hist=s.hist;prevGMV=s.prevGMV;prevTime=s.prevTime;prevCost=s.prevCost;
+  saveState();renderHist();update();
+}
+function clearHistory(){
+  if(!confirm('清空今日历史？'))return;
+  hist=[];prevGMV=null;prevTime=null;prevCost=null;undoStack=[];
+  saveState();renderHist();update();
+}
+function resetAll(){
+  if(!confirm('重新开播会清空所有数据，确认？'))return;
+  hist=[];prevGMV=null;prevTime=null;prevCost=null;undoStack=[];
+  saveState();renderHist();
+  ['gmv','cost','roi_manual'].forEach(function(id){document.getElementById(id).value='';});
+  document.getElementById('preview').textContent='填写数据后自动生成...';
+  document.getElementById('prev-hint').textContent='首次报数，无上一时段数据';
+}
+function updateCompare(){
+  var off=document.getElementById('gmv_off').value.trim();
+  var kol=document.getElementById('gmv_kol').value.trim();
+  var t=getT();
+  if(!off&&!kol){document.getElementById('compare_box').textContent='填写后自动生成...';return;}
+  document.getElementById('compare_box').textContent='官号/达人 '+t+' '+(off||'—')+'w/'+(kol||'—')+'w';
+}
+function copyReport(){flash('copyBtn','一键复制 发微信群',document.getElementById('preview').textContent);}
+function copyCompare(){flash('compareCopyBtn','复制对比报文',document.getElementById('compare_box').textContent);}
+function flash(id,orig,text){
+  if(text.indexOf('自动生成')>=0)return;
+  var btn=document.getElementById(id);
+  if(navigator.clipboard)navigator.clipboard.writeText(text);
+  else{var ta=document.createElement('textarea');ta.value=text;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);}
+  btn.textContent='已复制！';btn.classList.add('copied-flash');
+  setTimeout(function(){btn.textContent=orig;btn.classList.remove('copied-flash');},2000);
+}
+
+// ─── SCRIPTS ───
+var scripts=[
+  {tag:'人气',title:'人气召回话术',body:'宝子们！现在给大家一个惊喜，接下来10分钟有隐藏福利，快帮我把直播间分享给你的朋友，家人，让他们一起来！\n主播稍等一下，我们马上开始抽奖！'},
+  {tag:'人气',title:'互动拉人话术',body:'来了的宝子扣1！告诉我你从哪个城市来的！我看看我们直播间今天有多少城市的家人在线！\n我们做个小互动，最多的城市的家人等下有专属福利！'},
+  {tag:'转化',title:'价值强调话术',body:'宝子们，这个价格只有我们直播间才有！外面门票要XXX，我们今天直播间专属XXX，省下来的钱够孩子再玩一个项目！\n现在下单还送XXX，过了这个时间就没有了！'},
+  {tag:'转化',title:'紧迫感制造话术',body:'库存只剩XXX张了！我看一下后台……还有XX张，已经有XX个家人在抢了！\n手慢的宝子可能今天就买不到了，有需要的家人现在就下单！'},
+  {tag:'场景',title:'室外→室内切换',body:'宝子们，因为今天天气原因，我们现在转移到室内为大家直播！室内一样精彩，还有更多项目给大家看！\n我们室内的XXX项目其实是孩子们最喜欢的，跟我来看看！'},
+  {tag:'场景',title:'特色区域介绍话术',body:'宝子们，我现在带大家来到我们最受欢迎的XXX区域！这里节假日排队至少要等XX分钟，但是买了我们直播间的票可以快速通道进入！\n来，跟我一起进去看看里面是什么样子的！'},
+  {tag:'催单',title:'限时倒计时催单',body:'宝子们，还有最后10分钟！这个价格今天直播结束就没有了！\n下单的家人我们明天就会把入场二维码发到你的手机上，周末就可以直接来玩！手速快的家人现在下单！'},
+  {tag:'催单',title:'从众效应催单',body:'我看一下后台，哇这一分钟又有XX个家人下单了！大家都在抢，真的！\n还没下单的宝子快点，我们库存有限，卖完就没有了！已经下单的家人扣个"已抢到"！'},
+];
+var filteredScripts=scripts;
+function renderScripts(list){
+  document.getElementById('script-grid').innerHTML=list.map(function(s,i){
+    return '<div class="script-card" onclick="openScript('+scripts.indexOf(s)+')" id="sc-'+scripts.indexOf(s)+'">'
+      +'<div class="script-tag '+s.tag+'">'+s.tag+'</div>'
+      +'<div class="script-title">'+s.title+'</div>'
+      +'<div class="script-preview">'+s.body+'</div>'
+      +'</div>';
+  }).join('');
+}
+function filterScript(f,btn){
+  document.querySelectorAll('#script-filter .btn').forEach(function(b){b.classList.remove('act-filter');b.style.color='';b.style.borderColor='';});
+  btn.classList.add('act-filter');btn.style.color='var(--accent)';btn.style.borderColor='var(--accent)';
+  var list=f==='all'?scripts:scripts.filter(function(s){return s.tag===f;});
+  renderScripts(list);
+}
+var currentScriptIdx=null;
+function openScript(i){
+  currentScriptIdx=i;
+  var s=scripts[i];
+  document.getElementById('modal-script-title').textContent=s.title;
+  document.getElementById('modal-script-body').textContent=s.body;
+  document.getElementById('modal-script').classList.add('show');
+}
+function closeModal(){document.getElementById('modal-script').classList.remove('show');}
+function copyScript(){
+  var s=scripts[currentScriptIdx];
+  if(navigator.clipboard)navigator.clipboard.writeText(s.body);
+  else{var ta=document.createElement('textarea');ta.value=s.body;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);}
+  var n=new Date();
+  var ts=pad(n.getHours())+':'+pad(n.getMinutes());
+  sentLog.unshift({time:ts,title:s.title,tag:s.tag});
+  renderSentLog();
+  document.getElementById('sc-'+currentScriptIdx).classList.add('script-sent');
+  closeModal();
+  var btn=document.getElementById('modal-copy-btn');
+  btn.textContent='已复制！';
+  setTimeout(function(){btn.textContent='复制发给主播';},1500);
+}
+function renderSentLog(){
+  var el=document.getElementById('sent-log');
+  if(!sentLog.length){el.innerHTML='<div style="color:var(--text3)">暂无发送记录</div>';return;}
+  el.innerHTML=sentLog.slice(0,6).map(function(r){
+    return '<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid var(--border)">'
+      +'<span style="color:var(--text3);font-size:11px">'+r.time+'</span>'
+      +'<span class="tag tag-on" style="font-size:10px">'+r.tag+'</span>'
+      +'<span style="color:var(--text);font-size:12px">'+r.title+'</span>'
+      +'</div>';
+  }).join('');
+}
+function checkAlert(){
+  var on=parseFloat(document.getElementById('sc-online').value);
+  var cv=parseFloat(document.getElementById('sc-cvr').value);
+  var op=parseFloat(document.getElementById('sc-online-prev').value);
+  var cp=parseFloat(document.getElementById('sc-cvr-prev').value);
+  var box=document.getElementById('alert-box');
+  var msgs=[];
+  if(!isNaN(on)&&!isNaN(op)&&op>0&&(op-on)/op>0.15)msgs.push('在线人数下滑'+Math.round((op-on)/op*100)+'%');
+  if(!isNaN(cv)&&!isNaN(cp)&&cp>0&&(cp-cv)/cp>0.2)msgs.push('转化率下滑'+Math.round((cp-cv)/cp*100)+'%');
+  if(msgs.length){box.classList.add('show');document.getElementById('alert-text').textContent='⚠ '+msgs.join('，')+'，建议切换话术！';}
+  else box.classList.remove('show');
+}
+
+// ─── KOLS ───
+function updateTier(){
+  var gmv=parseFloat(document.getElementById('k-gmv').value)||0;
+  var t1g=parseFloat(document.getElementById('t1-gmv').value);
+  var t1r=document.getElementById('t1-rate').value;
+  var t2g=parseFloat(document.getElementById('t2-gmv').value);
+  var t2r=document.getElementById('t2-rate').value;
+  var base=document.getElementById('k-base').value;
+  var msg='';
+  if(!isNaN(t2g)&&gmv>=t2g)msg='🎉 已达第二阶梯，当前佣金 '+t2r+'%';
+  else if(!isNaN(t1g)&&gmv>=t1g){
+    msg='✅ 已达第一阶梯，当前佣金 '+t1r+'%';
+    if(!isNaN(t2g))msg+='，距第二阶梯还差 ¥'+Math.round(t2g-gmv).toLocaleString('zh-CN');
+  } else {
+    msg='当前佣金 '+base+'%';
+    if(!isNaN(t1g))msg+='，距第一阶梯还差 ¥'+Math.round(t1g-gmv).toLocaleString('zh-CN');
+  }
+  document.getElementById('tier-preview').textContent=msg;
+}
+function addKol(){
+  var name=document.getElementById('k-name').value.trim();
+  if(!name){alert('请填写达人昵称');return;}
+  var kol={
+    id:Date.now(),name:name,
+    product:document.getElementById('k-product').value.trim(),
+    base:document.getElementById('k-base').value,
+    gmv:parseFloat(document.getElementById('k-gmv').value)||0,
+    status:document.getElementById('k-status').value,
+    t1g:parseFloat(document.getElementById('t1-gmv').value)||0,
+    t1r:document.getElementById('t1-rate').value,
+    t2g:parseFloat(document.getElementById('t2-gmv').value)||0,
+    t2r:document.getElementById('t2-rate').value,
+  };
+  kols=kols.filter(function(k){return k.name!==name;});
+  kols.push(kol);
+  saveState();renderKols();
+  ['k-name','k-product','k-base','k-gmv','t1-gmv','t1-rate','t2-gmv','t2-rate'].forEach(function(id){document.getElementById(id).value='';});
+  document.getElementById('tier-preview').textContent='';
+}
+function getTierInfo(k){
+  if(k.t2g&&k.gmv>=k.t2g)return{label:'阶梯2',rate:k.t2r,cls:'tier-3',pct:100};
+  if(k.t1g&&k.gmv>=k.t1g){var pct=k.t2g?Math.min(99,Math.round((k.gmv-k.t1g)/(k.t2g-k.t1g)*100)):100;return{label:'阶梯1',rate:k.t1r,cls:'tier-2',pct:pct};}
+  var pct=k.t1g?Math.min(99,Math.round(k.gmv/k.t1g*100)):0;
+  return{label:'基础',rate:k.base,cls:'tier-1',pct:pct};
+}
+function renderKols(){
+  var el=document.getElementById('kol-list');
+  if(!kols.length){el.innerHTML='<div style="font-size:13px;color:var(--text3);text-align:center;padding:20px">暂无达人，点击右侧添加</div>';return;}
+  el.innerHTML=kols.map(function(k){
+    var ti=getTierInfo(k);
+    return '<div class="kol-row">'
+      +'<div><div class="kol-name">'+k.name+'</div><div class="kol-product">'+k.product+'</div></div>'
+      +'<div><div style="font-size:12px;color:var(--text2);margin-bottom:3px">GMV 进度</div><div style="display:flex;align-items:center;gap:8px"><div class="tier-bar-wrap"><div class="tier-bar" style="width:'+ti.pct+'%"></div></div><span style="font-size:11px;color:var(--text3)">'+ti.pct+'%</span></div></div>'
+      +'<div class="kol-gmv">¥'+Math.round(k.gmv).toLocaleString('zh-CN')+'</div>'
+      +'<div><span class="tier-badge '+ti.cls+'">'+ti.label+' '+ti.rate+'%</span></div>'
+      +'<div><span class="tag '+(k.status==='直播中'?'tag-on':'tag-off')+'">'+k.status+'</span></div>'
+      +'</div>';
+  }).join('');
+}
+
+// ─── REVIEW ───
+function addProblem(){
+  var idx=problems.length;
+  problems.push({issue:'',reason:'',solution:''});
+  renderProblems();
+}
+function renderProblems(){
+  var el=document.getElementById('prob-list');
+  el.innerHTML=problems.map(function(p,i){
+    return '<div class="prob-block">'
+      +'<div class="prob-label">问题 '+(i+1)+'</div>'
+      +'<div class="fg"><label>存在的问题</label><textarea rows="2" oninput="probUpdate('+i+',\'issue\',this.value)" placeholder="如：19:00-20:00 在线人数持续下滑">'+p.issue+'</textarea></div>'
+      +'<div class="fg"><label>原因分析</label><textarea rows="2" oninput="probUpdate('+i+',\'reason\',this.value)" placeholder="如：话术单一，缺乏互动引导">'+p.reason+'</textarea></div>'
+      +'<div class="fg"><label>优化方案</label><textarea rows="2" oninput="probUpdate('+i+',\'solution\',this.value)" placeholder="如：下次在该时段准备3套备用话术轮换">'+p.solution+'</textarea></div>'
+      +'<button class="btn btn-ghost btn-sm" style="color:var(--danger)" onclick="removeProblem('+i+')">删除</button>'
+      +'</div>';
+  }).join('');
+  buildReview();
+}
+function probUpdate(i,field,val){problems[i][field]=val;saveState();buildReview();}
+function removeProblem(i){problems.splice(i,1);renderProblems();}
+function buildReview(){
+  var gmv=parseFloat(document.getElementById('rv-gmv').value);
+  var cost=parseFloat(document.getElementById('rv-cost').value);
+  var roiM=document.getElementById('rv-roi').value;
+  var hours=document.getElementById('rv-hours').value;
+  var roi='—';
+  if(!isNaN(gmv)&&!isNaN(cost)&&cost>0)roi=(gmv/cost).toFixed(2);
+  if(roiM)roi=parseFloat(roiM).toFixed(2);
+  var n=new Date();
+  var dateStr=n.getFullYear()+'年'+(n.getMonth()+1)+'月'+n.getDate()+'日';
+  var lines=['📊 '+dateStr+' 直播复盘','─'.repeat(24)];
+  if(!isNaN(gmv))lines.push('GMV：¥'+Math.round(gmv).toLocaleString('zh-CN'));
+  if(!isNaN(cost))lines.push('消耗：¥'+Math.round(cost).toLocaleString('zh-CN'));
+  lines.push('ROI：'+roi);
+  if(hours)lines.push('直播时长：'+hours+'h');
+  if(problems.length){
+    lines.push('');
+    lines.push('【问题与优化方案】');
+    problems.forEach(function(p,i){
+      if(p.issue){lines.push('');lines.push('▍问题'+(i+1)+'：'+p.issue);}
+      if(p.reason)lines.push('原因：'+p.reason);
+      if(p.solution)lines.push('方案：'+p.solution);
+    });
+  }
+  document.getElementById('review-out').textContent=lines.join('\n');
+}
+function copyReview(){flash('reviewCopyBtn','复制复盘报告',document.getElementById('review-out').textContent);}
+
+// ─── INIT ───
+buildHours();loadState();initTime();renderHist();renderScripts(scripts);renderKols();renderProblems();
+document.querySelectorAll('#script-filter .btn').forEach(function(b,i){if(i===0){b.style.color='var(--accent)';b.style.borderColor='var(--accent)';}});
+document.getElementById('hour').addEventListener('change',update);
+document.getElementById('minute').addEventListener('change',update);
+</script>
+</body>
+</html>
